@@ -1,0 +1,25 @@
+import threading
+import uvicorn
+import webview
+import os
+import sys
+
+def start_server():
+    uvicorn.run("api.oroboro_api:app", host="127.0.0.1", port=8000, log_level="warning")
+
+if __name__ == "__main__":
+    # Start FastAPI backend in a background thread
+    server_thread = threading.Thread(target=start_server, daemon=True)
+    server_thread.start()
+
+    # Resolve paths for PyInstaller bundle or local execution
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.dirname(__file__)
+
+    cockpit_path = os.path.join(base_path, "cockpit", "index.html")
+
+    # Open a native application window pointing to the local cockpit interface
+    window = webview.create_window("OROBORO Simulation Engine", f"file://{os.path.abspath(cockpit_path)}", width=1280, height=800)
+    webview.start()
